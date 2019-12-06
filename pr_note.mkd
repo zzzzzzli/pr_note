@@ -1,109 +1,147 @@
 概率机器人笔记
+====================
 
-条件概率公式：
+[TOC]
+
+# 第一章 数学基础
+
+## 一、概率论
+
+### 【1.1 条件概率公式】
 
 1.  定义
-
-$$
-p(A|B)=\frac{p(AB)}{P(B)}\to p(AB)=p(A|B)\cdot p(B)\\
-$$
+    $$
+    p(A|B)=\frac{p(AB)}{P(B)}\to p(AB)=p(A|B)\cdot p(B)
+    $$
 
 2.  如果将两件事看作一件事
+    $$
+    \begin{align}
+    p(B|A,C)&=\frac{p(ABC)}{p(AC)}\notag\\
+    &=\frac{p(A|B,C)\cdot p(BC)}{p(AC)}\notag\\
+    &=\frac{p(A|B,C)\cdot p(B|C)\cdot p(C)}{p(A|C)\cdot p(C)}\notag\\
+    &=\frac{p(A|B,C)\cdot p(B|C)}{p(A|C)}\\
+    p(A|B,C)&=\frac{p(B|A,C)\cdot p(A|C)}{p(B|C)}\label{PABC}
+    \end{align}
+    $$
+    
+3.  **条件独立：**$p(x,y|z)=p(x|z)p(y|z)$，表达以$z$为条件的两个独立随机变量的联合概率，并且，条件独立定律一般不能和独立时间公式$p(x,y)=p(x)p(y)$互推。
 
-$$
-\begin{align}
-p(B|A,C)&=\frac{p(ABC)}{p(AC)}\notag\\
-&=\frac{p(A|B,C)\cdot p(BC)}{p(AC)}\notag\\
-&=\frac{p(A|B,C)\cdot p(B|C)\cdot p(C)}{p(A|C)\cdot p(C)}\notag\\
-&=\frac{p(A|B,C)\cdot p(B|C)}{p(A|C)}\\
-p(A|B,C)&=\frac{p(B|A,C)\cdot p(A|C)}{p(B|C)}\label{PABC}
+### 【1.2 贝叶斯】
+
+1.  贝叶斯（Bayes）的先验概率：如果$x$是希望从$y$中推测出来的数值，则$p(x)$称为**先验概率**，先验概率不包含任何关于从$y$到$x$的推测，仅仅是人们对$x$的经验认识，$y$称为**数据**，在机器人中就是传感器测量值。$p(x)$总结了在综合数据$y$之前已经有的关于$x$的信息。
+2.  贝叶斯的后验概率：从传感器数据$y$推断$x$的值得到的关于$x$的概率分布$p(x|y)$，称为**在$X$上的后验概率分布**。由条件概率公式（贝叶斯定理），后验概率分布$p(x|y)=\frac{p(y|x)p(x)}{p(y)}$，由于分母$p(y)$不依赖任何$x$，因此对于任何$x$，$p(y)$总是常数，称为**归一化常数**。所以，贝叶斯定理的简洁表达式为：$p(x|y)=\eta p(y|x)p(x)$。
+
+### 【1.3方差、协方差、协方差矩阵】
+
+1.  方差：一个随机变量$X$分布的离散度
+    $$
+    \begin{align}
+    \sigma^2&=D(X)\\
+    &=E\{[X-E(X)]^2\}\notag\\
+    &=\overline{(X-\overline{X})^2)}\notag\\
+    &=E(X^2)-[E(X)]^2\\
+    &=\overline{X^2}-{\overline X}^2\\
 \end{align}
-$$
+    $$
+    
+2.  协方差：两个随机变量$X$和$Y$之间的线性相关性（协方差为零也有可能存在非线性相关性）
+    $$
+    \text{Cov}(X,Y)=E\{[X-E(X)][Y-E(Y)]\}
+    $$
+    （线性）相关系数：
+    $$
+    \rho_{xy}=\frac{\text{Cov}(X,Y)}{\sqrt{D(X)}\sqrt{D(Y)}}
+    $$
 
-线性代数：
+3.  协方差矩阵：若干个随机变量$\boldsymbol x=\{x_1,x_2,\cdots,x_n\}$之间的线性相关性
+    $$
+    \boldsymbol C=
+    \begin{pmatrix}
+    \text{Cov}(x_1,x_1),\text{Cov}(x_1,x_2),\cdots,\text{Cov}(x_1,x_n)\\
+    \text{Cov}(x_2,x_1),\text{Cov}(x_2,x_2),\cdots,\text{Cov}(x_2,x_n)\\
+    \vdots,\vdots,\ddots,\vdots,\\
+    \text{Cov}(x_n,x_1),\text{Cov}(x_n,x_2),\cdots,\text{Cov}(x_n,x_n)
+    \end{pmatrix}
+    $$
+
+### 【1.4其他】
+
+1.  多元正态分布：$p(\boldsymbol x)=\det(2\pi\Sigma)^{-\frac12}\exp\{-\frac12(\boldsymbol{x-\mu})^\text{T}\Sigma^{-1}\boldsymbol{x-\mu})\}$
+
+2.  一个概率分布$p(x)$的熵：
+    $$
+    \begin{align}
+    &H_p(x)=E(-\log_2p(x))\\
+    &H_p(x)=-\int p(x)\log_2p(x)\text{d}x\ \ \ \ \text{（连续）}\\
+    &H_p(x)=-\sum_{x}p(x)\log_2p(x) \ \ \ \ \text{（离散）}
+    \end{align}
+    $$
+
+## 二、线性代数
 
 1.  二次型：关于向量$\boldsymbol x=\{x_1,x_2,\cdots,x_n\}$中各个元素的二次函数，可以用矩阵表达。
 
-第二章 递归状态估计
+# 第二章 递归状态估计
 
-1.  多元正态分布：$p(\boldsymbol x)=\det(2\pi\Sigma)^{-\frac12}\exp\{-\frac12(\boldsymbol{x-\mu})^\text{T}\Sigma^{-1}\boldsymbol{x-\mu})\}$
-2.  贝叶斯（Bayes）的先验概率：如果$x$是希望从$y$中推测出来的数值，则$p(x)$称为**先验概率**，先验概率不包含任何关于从$y$到$x$的推测，仅仅是人们对$x$的经验认识，$y$称为**数据**，在机器人中就是传感器测量值。$p(x)$总结了在综合数据$y$之前已经有的关于$x$的信息。
-3.  贝叶斯的后验概率：从传感器数据$y$推断$x$的值得到的关于$x$的概率分布$p(x|y)$，称为**在$X$上的后验概率分布**。由条件概率公式（贝叶斯定理），后验概率分布$p(x|y)=\frac{p(y|x)p(x)}{p(y)}$，由于分母$p(y)$不依赖任何$x$，因此对于任何$x$，$p(y)$总是常数，称为**归一化常数**。所以，贝叶斯定理的简洁表达式为：$p(x|y)=\eta p(y|x)p(x)$。
-4.  (2.16)式由$\eqref{PABC}$式得到。
-5.  **条件独立：**$p(x,y|z)=p(x|z)p(y|z)$，表达以$z$为条件的两个独立随机变量的联合概率，并且，条件独立定律一般不能和独立时间公式$p(x,y)=p(x)p(y)$互推。
-6.  协方差：
-7.  一个概率分布$p(x)$的熵：
-
-$$
-\begin{align}
-&H_p(x)=E(-\log_2p(x))\\
-&H_p(x)=-\int p(x)\log_2p(x)\text{d}x\ \ \ \ \text{（连续）}\\
-&H_p(x)=-\sum_{x}p(x)\log_2p(x) \ \ \ \ \text{（离散）}
-\end{align}
-$$
-
-8.  状态：包含环境（动态状态：如周围人物的走动等，静态状态：建筑物的位置等）和机器人本身（机器人的位姿，速度、传感器是否正常等）的会对未来产生影响的所有方面的因素，用$\boldsymbol x$表示。一般包括
+1.  状态：包含环境（动态状态：如周围人物的走动等，静态状态：建筑物的位置等）和机器人本身（机器人的位姿，速度、传感器是否正常等）的会对未来产生影响的所有方面的因素，用$\boldsymbol x$表示。一般包括
     -   机器人的位姿：机器人相对于全局坐标系的位置和方向
     -   机器人执行机构配置（运动学状态）：各个关节的关节角度以及其它自由度
     -   机器人的运动状态：速度、角速度
     -   机器人的环境状态：环境中周围物体的位置和特征
-    
-9.  状态的完整性：假设一个状态$\boldsymbol x_t$可以最好地预测未来，则其是完整的。
 
-10.  环境交互：包含**环境传感器测量**和**控制动作改变世界地状态**两部分。机器人连续地执行控制，同时进行测量。
+2.  环境交互：包含**环境传感器测量**和**控制动作改变世界地状态**两部分。机器人连续地执行控制，同时进行测量。
 
-11.  概率生成法则，状态和测量的演变由概率法则支配，状态转移概率和测量概率仪器描述机器人及其环境组成的动态随机系统。
+3.  概率生成法则，状态和测量的演变由概率法则支配，状态转移概率和测量概率仪器描述机器人及其环境组成的动态随机系统。
+    -   状态转移概率：$p(\boldsymbol x_t|\boldsymbol x_{0:t-1},\boldsymbol z_{0:t-1},\boldsymbol u_{1:t})=p(\boldsymbol x_t|\boldsymbol x_{t-1},\boldsymbol u_t)$，条件独立公式（条件独立的含义没理解），即遵循马尔科夫假设；
+    -   测量概率：$p(\boldsymbol z_t|\boldsymbol x_t)$或者$p(\boldsymbol z|\boldsymbol x)$，表明如果$\boldsymbol x$是完整的，则状态$\boldsymbol x_t$足以预测（有潜在噪声的）测量$\boldsymbol z_t$，过去的测量、控制、状态等其他变量信息都与之无关。
 
-     -   状态转移概率：$p(\boldsymbol x_t|\boldsymbol x_{0:t-1},\boldsymbol z_{0:t-1},\boldsymbol u_{1:t})=p(\boldsymbol x_t|\boldsymbol x_{t-1},\boldsymbol u_t)$，条件独立公式（条件独立的含义没理解），即遵循马尔科夫假设；
-     -   测量概率：$p(\boldsymbol z_t|\boldsymbol x_t)$或者$p(\boldsymbol z|\boldsymbol x)$，表明如果$\boldsymbol x$是完整的，则状态$\boldsymbol x_t$足以预测（有潜在噪声的）测量$\boldsymbol z_t$，过去的测量、控制、状态等其他变量信息都与之无关。
+<img src="fig/image-20191204125337622.png" alt="隐形马尔可夫模型或动态贝叶斯网络" style="zoom: 67%;" />
 
-     <img src="fig/image-20191204125337622.png" alt="隐形马尔可夫模型或动态贝叶斯网络" style="zoom: 67%;" />
+4.  置信度（信息的状态/信息状态）-置信分布
+    -   置信度分布是**以可获得数据（所有过去的测量$\boldsymbol{z}_t$和所有过去的控制$\boldsymbol u_t$）为条件**的**关于状态变量的**后验概率$\text{bel}(\boldsymbol x_t)=p(\boldsymbol x_t|\boldsymbol z_{1:t}, \boldsymbol u_{1:t})$，注意$\boldsymbol z$的下表是$1:t$而不是$1:t-1$。
+    -   综合$\boldsymbol z_t$之前计算的后验概率或者置信度（有些地方叫做似然）$\overline{\text{bel}}(\boldsymbol x_t)=p(\boldsymbol x_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})$，是通过$t$之前历史测量数据对状态转移概率（先验）的修正。
 
-12.  置信度（信息的状态/信息状态）-置信分布
+5.  贝叶斯（Bayes）滤波
 
-     -   置信度分布是**以可获得数据（所有过去的测量$\boldsymbol{z}_t$和所有过去的控制$\boldsymbol u_t$）为条件**的**关于状态变量的**后验概率$\text{bel}(\boldsymbol x_t)=p(\boldsymbol x_t|\boldsymbol z_{1:t}, \boldsymbol u_{1:t})$，注意$\boldsymbol z$的下表是$1:t$而不是$1:t-1$。
-     -   综合$\boldsymbol z_t$之前计算的后验概率或者置信度（有些地方叫做似然）$\overline{\text{bel}}(\boldsymbol x_t)=p(\boldsymbol x_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})$，是通过$t$之前历史测量数据对状态转移概率（先验）的修正。
+    ​        贝叶斯滤波使用上一个时刻$t-1$的状态置信度，来推测当前时刻$t$的状态置信度。假设有一个系统递归方程$\boldsymbol x_t=f(\boldsymbol x_{t-1})+\boldsymbol v(t)$，其中$\boldsymbol v(t)$是噪声，和一个测量方程$\boldsymbol z_t=g(\boldsymbol x_t+\boldsymbol n_t)$。
 
-13.  贝叶斯（Bayes）滤波
+    ​        首先通过系统方程可以得到当前时刻的状态转移概率，即先验概率分布（注意状态分布和噪声分布一样，再加上平移）$p(\boldsymbol x_t|\boldsymbol x_{t-1}, \boldsymbol z_{1:t-1},\boldsymbol u_{1:t})=p(\boldsymbol x_t|\boldsymbol x_{t-1},\boldsymbol u_t)$，此处采用马尔科夫假设（状态完整性假设）。
 
-     ​        贝叶斯滤波使用上一个时刻$t-1$的状态置信度，来推测当前时刻$t$的状态置信度。假设有一个系统递归方程$\boldsymbol x_t=f(\boldsymbol x_{t-1})+\boldsymbol v(t)$，其中$\boldsymbol v(t)$是噪声，和一个测量方程$\boldsymbol z_t=g(\boldsymbol x_t+\boldsymbol n_t)$。
+    ​        另一方面，既然已经有了$[1,t-1]$时刻的测量数据，可以使用历史测量数据对$t$时刻的状态概率分布进行估计$p(\boldsymbol x_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})$，根据联合分布公式可得
+    $$
+    \overline{\text{bel}}(\boldsymbol x_t)=p(\boldsymbol x_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})=\int p(\boldsymbol x_t|\boldsymbol x_{t-1},\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})\cdot p(\boldsymbol x_{t-1}|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})\text{d}\boldsymbol x_{t-1}\label{siran}
+    $$
+    ​        $\eqref{siran}$式也就是综合$\boldsymbol z_t$之前计算的置信度，有些地方叫做似然，其中积分符号内是状态转移概率与前一个时刻的状态置信度的乘积。前者通过系统方程得到，后者为已知。**该式子也可以理解为用$t-1$时刻的状态置信度对$t$时刻的状态转移概率求期望值，期望值就是在$t$时刻上结合了历史测量数据的状态分布预测，也就是$\overline{\text{bel}}(\boldsymbol x_t)$。**
 
-     ​        首先通过系统方程可以得到当前时刻的状态转移概率，即先验概率分布（注意状态分布和噪声分布一样，再加上平移）$p(\boldsymbol x_t|\boldsymbol x_{t-1}, \boldsymbol z_{1:t-1},\boldsymbol u_{1:t})=p(\boldsymbol x_t|\boldsymbol x_{t-1},\boldsymbol u_t)$，此处采用马尔科夫假设（状态完整性假设）。
+    ​        然后，通过测量方程得到当前时刻系统测量结果及其分布$p(\boldsymbol z_t|\boldsymbol x_t,\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})=p(\boldsymbol z_t|\boldsymbol x_t)$。
 
-     ​        另一方面，既然已经有了$[1,t-1]$时刻的测量数据，可以使用历史测量数据对$t$时刻的状态概率分布进行估计$p(\boldsymbol x_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})$，根据联合分布公式可得
-     $$
-     \overline{\text{bel}}(\boldsymbol x_t)=p(\boldsymbol x_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})=\int p(\boldsymbol x_t|\boldsymbol x_{t-1},\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})\cdot p(\boldsymbol x_{t-1}|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})\text{d}\boldsymbol x_{t-1}\label{siran}
-     $$
-     ​         $\eqref{siran}$式也就是综合$\boldsymbol z_t$之前计算的置信度，有些地方叫做似然，其中积分符号内是状态转移概率与前一个时刻的状态置信度的乘积。前者通过系统方程得到，后者为已知。**该式子也可以理解为用$t-1$时刻的状态置信度对$t$时刻的状态转移概率求期望值，期望值就是在$t$时刻上结合了历史测量数据的状态分布预测，也就是$\overline{\text{bel}}(\boldsymbol x_t)$。**
+    ​        当前时刻系统状态分布的置信度$\text{bel}(\boldsymbol x_t)=p(\boldsymbol x_t|\boldsymbol z_{1:t},\boldsymbol u_{1:t})$，可以根据条件概率公式（贝叶斯准则），即$\eqref{PABC}$式推导得出
+    $$
+    \begin{align}
+    \text{bel}(\boldsymbol x_t)&=p(\boldsymbol x_t|\boldsymbol z_{1:t},\boldsymbol u_{1:t})\notag\\
+    &=p(\boldsymbol x_t|\boldsymbol z_t,\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})\notag\\
+    &=\frac{p(\boldsymbol z_t|\boldsymbol x_t,\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})\cdot p(\boldsymbol x_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})}{p(\boldsymbol z_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})}\notag\\
+    &=\eta p(\boldsymbol z_t|\boldsymbol x_t)\cdot \overline{\text{bel}}(\boldsymbol x_t)\label{belief}
+    \end{align}
+    $$
+    其中$\eta=p(\boldsymbol z_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})^{-1}$与$\boldsymbol x_t$无关，为归一化常数，可以通过归一化方法来计算，或者使用积分方法计算
+    $$
+    \eta=p(\boldsymbol z_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})=\int p(\boldsymbol z_t|\boldsymbol x_{t-1})\text{d}\boldsymbol x_{t-1}\label{eta}
+    $$
+    ​        通过$\eqref{belief}$式将当前时刻的系统状态置信度变为测量概率分布与**似然**的乘积，而似然又可以根据前一个时刻的置信度与状态转移概率得出，当$t=1$时，需要初始置信度$\text{bel}(\boldsymbol x_0)$。这就是贝叶斯滤波方法，其中(1)~(2)为预测，(4)为测量，(5)为更新。
 
-     ​        然后，通过测量方程得到当前时刻系统测量结果及其分布$p(\boldsymbol z_t|\boldsymbol x_t,\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})=p(\boldsymbol z_t|\boldsymbol x_t)$。
+    ​        贝叶斯滤波算法的步骤：
 
-     ​        当前时刻系统状态分布的置信度$\text{bel}(\boldsymbol x_t)=p(\boldsymbol x_t|\boldsymbol z_{1:t},\boldsymbol u_{1:t})$，可以根据条件概率公式（贝叶斯准则），即$\eqref{PABC}$式推导得出
-     $$
-     \begin{align}
-     \text{bel}(\boldsymbol x_t)&=p(\boldsymbol x_t|\boldsymbol z_{1:t},\boldsymbol u_{1:t})\notag\\
-     &=p(\boldsymbol x_t|\boldsymbol z_t,\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})\notag\\
-     &=\frac{p(\boldsymbol z_t|\boldsymbol x_t,\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})\cdot p(\boldsymbol x_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})}{p(\boldsymbol z_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})}\notag\\
-     &=\eta p(\boldsymbol z_t|\boldsymbol x_t)\cdot \overline{\text{bel}}(\boldsymbol x_t)\label{belief}
-     \end{align}
-     $$
-     其中$\eta=p(\boldsymbol z_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})^{-1}$与$\boldsymbol x_t$无关，为归一化常数，可以通过归一化方法来计算，或者使用积分方法计算
-     $$
-     \eta=p(\boldsymbol z_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})=\int p(\boldsymbol z_t|\boldsymbol x_{t-1})\text{d}\boldsymbol x_{t-1}\label{eta}
-     $$
-     ​        通过$\eqref{belief}$式将当前时刻的系统状态置信度变为测量概率分布与**似然**的乘积，而似然又可以根据前一个时刻的置信度与状态转移概率得出，当$t=1$时，需要初始置信度$\text{bel}(\boldsymbol x_0)$。这就是贝叶斯滤波方法，其中(1)~(2)为预测，(4)为测量，(5)为更新。
-     
-     ​        贝叶斯滤波算法的步骤：
-     
-     -   (0) 初始化初始置信度$\text{bel}(\boldsymbol x_0)$，$t=1$；
-     -   **(1) 根据系统方程计算状态转移概率作为先验概率分布$p(\boldsymbol x_t|\boldsymbol x_{t-1},\boldsymbol u_t)$；**
-     -   **(2) 根据状态转移概率$p(\boldsymbol x_t|\boldsymbol x_{t-1},\boldsymbol u_t)$和前一个时刻的状态置信度$\text{bel}(\boldsymbol x_{t-1})$，利用$\eqref{siran}$式计算$\overline{\text{bel}}(\boldsymbol x_t)$；**
-     -   **(3) 根据$\eqref{eta}$式计算$t$时刻的归一化常数$\eta_t$；**
-     -   **(4) 根据系统测量方程得到测量概率分布$p(\boldsymbol z_t|\boldsymbol x_t)$；**
-     -   **(5) 根据测量测量概率分布、似然（即综合$\boldsymbol z_t$之前的置信度）以及归一化常数，利用$\eqref{belief}$式计算置信度；**
-     -   (6) $t=t+1$，重复（2）到（6），直到满足退出条件。
+    -   (0) 初始化初始置信度$\text{bel}(\boldsymbol x_0)$，$t=1$；
+    -   **(1) 根据系统方程计算状态转移概率作为先验概率分布$p(\boldsymbol x_t|\boldsymbol x_{t-1},\boldsymbol u_t)$；**
+    -   **(2) 根据状态转移概率$p(\boldsymbol x_t|\boldsymbol x_{t-1},\boldsymbol u_t)$和前一个时刻的状态置信度$\text{bel}(\boldsymbol x_{t-1})$，利用$\eqref{siran}$式计算$\overline{\text{bel}}(\boldsymbol x_t)$；**
+    -   **(3) 根据$\eqref{eta}$式计算$t$时刻的归一化常数$\eta_t$；**
+    -   **(4) 根据系统测量方程得到测量概率分布$p(\boldsymbol z_t|\boldsymbol x_t)$；**
+    -   **(5) 根据测量测量概率分布、似然（即综合$\boldsymbol z_t$之前的置信度）以及归一化常数，利用$\eqref{belief}$式计算置信度；**
+    -   (6) $t=t+1$，重复（2）到（6），直到满足退出条件。
 
-第三章 高斯滤波
+# 第三章 高斯滤波
 
 高斯滤波家族是实现贝叶斯滤波的一类方式，具体的还分为不同的方法，如卡尔曼滤波、扩展卡尔曼滤波、信息滤波等。所有高斯滤波都用多元高斯分布表示置信度
 $$
@@ -121,18 +159,18 @@ $$
             \boldsymbol x_t=\boldsymbol A_t\boldsymbol x_{t-1}+\boldsymbol B_t\boldsymbol u_{t}+\boldsymbol \varepsilon_t\label{KF-systemfunction}
             $$
 
-        -   测量概率也**与带有高斯噪声的自变量呈线性关系**，其测量方程可以表示为$\eqref{KF-measurefunction}$式，其中$\boldsymbol\delta_t$为测量噪声，为高斯分布，期望式$\boldsymbol 0$，协方差矩阵为（后都称作方差）$\boldsymbol Q_t$。
+        -   测量概率也**与带有高斯噪声的自变量呈线性关系**，其测量方程可以表示为$\eqref{KF-measurefunction}$式，其中$\boldsymbol\delta_t$为测量噪声，为高斯分布，期望式$\boldsymbol 0$，协方差矩阵为（后都称作协方差）$\boldsymbol Q_t$。
             $$
             \boldsymbol z_t=\boldsymbol C_t\boldsymbol x_t+\boldsymbol\delta_t\label{KF-measurefunction}
             $$
 
-        -   初始置信度必须是高斯分布，期望为$\boldsymbol\mu_0$，方差为$\boldsymbol\Sigma_t$。
+        -   初始置信度必须是高斯分布，期望为$\boldsymbol\mu_0$，协方差为$\boldsymbol\Sigma_t$。
         
         这三个假设保证了置信度在任何时刻都是高斯的。
         
     -   数学原理
     
-        ​        卡尔曼滤波也从贝叶斯滤波出发，其流程和贝叶斯滤波相同，经过了预测和测量更新两步。其中预测部分求出了$\overline{\text{bel}}(\boldsymbol x_t)$，更新部分求出$\text{bel}(\boldsymbol x_t)$。由于两者都呈高斯分布，因此，对于分布的计算只需求出其**期望$\boldsymbol \mu$**和**方差$\boldsymbol\Sigma$**。这里说明一下多元高斯分布的含义，多元高斯分布$\eqref{gaussian}$其指数是关于$\boldsymbol x$的二次型，即指数部分如果能表示呈关于某一个向量的二次型，则该函数就是高斯分布。形如$p(\boldsymbol x)=\eta\exp[-\mathscr{L}(\boldsymbol x)]$，其中$\mathscr{L}(\boldsymbol x)$是二次型的归一化函数就是高斯分布。高斯分布有两个性质：1.  $\boldsymbol\mu=\arg[\frac{\partial\mathscr{L}}{\partial\boldsymbol x}=0]$，2. $\boldsymbol\Sigma=[\frac{\partial^2\mathscr{L}}{\partial\boldsymbol x^2}]^{-1}$。
+        ​        卡尔曼滤波也从贝叶斯滤波出发，其流程和贝叶斯滤波相同，经过了预测和测量更新两步。其中预测部分求出了$\overline{\text{bel}}(\boldsymbol x_t)$，更新部分求出$\text{bel}(\boldsymbol x_t)$。由于两者都呈高斯分布，因此，对于分布的计算只需求出其**期望$\boldsymbol \mu$**和**协方差$\boldsymbol\Sigma$**。这里说明一下多元高斯分布的含义，多元高斯分布$\eqref{gaussian}$其指数是关于$\boldsymbol x$的二次型，即指数部分如果能表示呈关于某一个向量的二次型，则该函数就是高斯分布。形如$p(\boldsymbol x)=\eta\exp[-\mathscr{L}(\boldsymbol x)]$，其中$\mathscr{L}(\boldsymbol x)$是二次型的归一化函数就是高斯分布。高斯分布有两个性质：1.  $\boldsymbol\mu=\arg[\frac{\partial\mathscr{L}}{\partial\boldsymbol x}=0]$，2. $\boldsymbol\Sigma=[\frac{\partial^2\mathscr{L}}{\partial\boldsymbol x^2}]^{-1}$。
     
         -   **预测：**根据$\eqref{siran}$式以及线性高斯假设，
             $$
@@ -141,7 +179,7 @@ $$
             &=\mathcal{N}(\boldsymbol x_t;\boldsymbol{\bar\mu}_t,\boldsymbol{\bar\Sigma}_t)
             \end{align}
             $$
-            其中$\mathcal{N}(x;\mu,\sigma^2)$表示高斯分布，$\mu_{t-1\to t}$表示状态转移概率的期望，$\Sigma_{t-1\to t}$表示状态转移概率的方差，$\mu_{t-1}$表示$t-1$时刻的置信度期望，$\Sigma_{t-1}$表示$t-1$时刻置信度的方差。$\eqref{KF-barbel}$式是两个高斯分布乘积的积分，其结果仍然是高斯分布。**由于两个高斯分布的乘积，其各自的指数部分都是关于各自随机变量的二次型，指数函数相乘即指数相加，二次型相加仍然为各自随机变量的新二次型，新二次型记为$\mathscr{L}(\boldsymbol x_t)$。积分积掉$\boldsymbol x_{t-1}$，对$\boldsymbol x_t$仍然为高斯分布，对$\mathscr{L}(\boldsymbol x_t)$求一阶导数和二阶导数即可求出$\boldsymbol{\bar\mu}$和$\boldsymbol{\bar\Sigma}_t$**。
+            其中$\mathcal{N}(x;\mu,\sigma^2)$表示高斯分布，$\mu_{t-1\to t}$表示状态转移概率的期望，$\Sigma_{t-1\to t}$表示状态转移概率的协方差，$\mu_{t-1}$表示$t-1$时刻的置信度期望，$\Sigma_{t-1}$表示$t-1$时刻置信度的协方差。$\eqref{KF-barbel}$式是两个高斯分布乘积的积分，其结果仍然是高斯分布。**由于两个高斯分布的乘积，其各自的指数部分都是关于各自随机变量的二次型，指数函数相乘即指数相加，二次型相加仍然为各自随机变量的新二次型，新二次型记为$\mathscr{L}(\boldsymbol x_t)$。积分积掉$\boldsymbol x_{t-1}$，对$\boldsymbol x_t$仍然为高斯分布，对$\mathscr{L}(\boldsymbol x_t)$求一阶导数和二阶导数即可求出$\boldsymbol{\bar\mu}$和$\boldsymbol{\bar\Sigma}_t$**。
             $$
             \color{red}\begin{align}
             \boldsymbol{\bar\mu}&=\boldsymbol A_t\boldsymbol\mu_{t-1}+\boldsymbol B_t\boldsymbol u_t\\
@@ -156,7 +194,7 @@ $$
             &=\mathcal{N}(\boldsymbol x_t;\boldsymbol\mu_t,\boldsymbol\Sigma_t)
             \end{align}
             $$
-            其中，$\boldsymbol\mu_t^z=\boldsymbol C_t\boldsymbol x_t$为测量期望，$\boldsymbol Q_t$为测量方差，$\boldsymbol\mu_t$为$t$时刻置信度期望，$\boldsymbol\Sigma_t$为$t$时刻置信度方差。**两个高斯分布相乘同样是高斯分布**。
+            其中，$\boldsymbol\mu_t^z=\boldsymbol C_t\boldsymbol x_t$为测量期望，$\boldsymbol Q_t$为测量协方差，$\boldsymbol\mu_t$为$t$时刻置信度期望，$\boldsymbol\Sigma_t$为$t$时刻置信度协方差。**两个高斯分布相乘同样是高斯分布**。
             $$
             \color{red}\begin{align}
             \boldsymbol K_t&=\boldsymbol\Sigma_t\boldsymbol C_t^{\text{T}}\boldsymbol Q_t^{-1}\notag\\
@@ -175,7 +213,7 @@ $$
     
 2.  扩展卡尔曼滤波（Extend Kalman Filter, EKF）
 
-    ​        卡尔曼滤波的重要假设是线性高斯系统，其中**线性**的含义是，观测时状态的线性函数，并且下一个状态是前一个状态的线性函数。**高斯线性系统的特性是，高斯随机变量的任何线性变换都将导致另一个高斯随机变量。**不幸的是，实际中状态转移和测量很少是线性的，这使得卡尔曼滤波算法不适用于除了最平凡的机器人问题以外的其他所有问题（好象很严峻的样子）。
+    ​        卡尔曼滤波的重要假设是线性高斯系统，其中**线性**的含义是，**①观测是状态的线性函数**，并且**②下一个状态是前一个状态的线性函数**。**高斯线性系统的特性是，高斯随机变量的任何线性变换都将导致另一个高斯随机变量。**不幸的是，实际中状态转移和测量很少是线性的，这使得卡尔曼滤波算法不适用于除了最平凡的机器人问题以外的其他所有问题（好象很严峻的样子）。
 
     ​        扩展卡尔曼滤波假设状态转移概率和测量概率分别由非线性函数$g$和$h$控制。即
     $$
@@ -184,7 +222,7 @@ $$
     \boldsymbol z_t&=h(\boldsymbol x_t)+\boldsymbol\delta_t
     \end{align}
     $$
-    准确地实现对置信度地更新对非线性函数是不可能的，因此扩展卡尔曼滤波计算真实置信度的高斯近似，其期望和方差仍然为$\boldsymbol\mu_t$和$\boldsymbol\Sigma_t$，不同的是，扩展卡尔曼滤波的目标就从计算精确的后验概率转变为有效地估计其期望和方差。
+    准确地实现对置信度地更新对非线性函数是不可能的，因此扩展卡尔曼滤波计算真实置信度的高斯近似，其期望和协方差仍然为$\boldsymbol\mu_t$和$\boldsymbol\Sigma_t$，不同的是，扩展卡尔曼滤波的目标就从计算精确的后验概率转变为有效地估计其期望和协方差。
 
     ​        扩展卡尔曼滤波通过一个与非线性函数$g$在高斯均值处相切地线性函数取近似非线性函数$g$。
 
@@ -194,7 +232,89 @@ $$
             $$
             \begin{align}
             g(\boldsymbol u_t,\boldsymbol x_{t-1})&=g(\boldsymbol u_t,\boldsymbol\mu_{t-1})+\frac{\partial g(\boldsymbol u_t,\boldsymbol x_{t-1})}{\partial \boldsymbol x_{t-1}}|_{\boldsymbol x_{t-1}=\boldsymbol\mu_{t-1}}+\cdots \notag\\
-            &\approx g(\boldsymbol u_t,\boldsymbol\mu_{t-1})+\boldsymbol G_t(\boldsymbol x_{t-1}-\boldsymbol\mu_{t-1})
+            &\approx g(\boldsymbol u_t,\boldsymbol\mu_{t-1})+\boldsymbol G_t(\boldsymbol x_{t-1}-\boldsymbol\mu_{t-1})\label{g_taylor}
             \end{align}
             $$
+            $\eqref{g_taylor}$式就是一个线性函数，和$\eqref{KF-systemfunction}$式一样，满足了**线性要求中**，**下一个状态是前一个状态的线性函数**这一要求，$\boldsymbol G_t=\frac{\partial g(\boldsymbol u_t,\boldsymbol x_{t-1})}{\partial \boldsymbol x_{t-1}}\vline_{\boldsymbol x_{t-1}=\boldsymbol\mu_{t-1}}=?$，是雅可比矩阵。
             
+        -   同理，将函数$h(\boldsymbol x_t)$在$\boldsymbol x_t=\boldsymbol{\bar\mu}_t$处做一阶泰勒展开
+            $$
+            \begin{align}
+            h(\boldsymbol x_t)&=h(\boldsymbol{\bar\mu}_t)+h'(\boldsymbol{\bar\mu}_t)(\boldsymbol x_t-\boldsymbol{\bar\mu}_t)+\cdots\notag\\
+            &\approx h(\boldsymbol{\bar\mu}_t)+\boldsymbol H_t(\boldsymbol x_t-\boldsymbol{\bar\mu}_t)
+            \end{align}
+            $$
+            满足了**线性要求中**，**观测是状态的线性函数**这一要求，$\boldsymbol H_t$是雅可比矩阵。
+        
+    -   扩展卡尔曼滤波算法：满足了系统的线性要求，只要初始置信度是高斯的，则就可以使用卡尔曼滤波数学原理，得出扩展卡尔曼滤波的算法过程，即
+        $$
+        \color{red}
+        \begin{align}
+        \boldsymbol{\bar\mu}_t&=g(\boldsymbol u_t,\boldsymbol\mu_{t-1})\\
+        \boldsymbol{\bar\Sigma}_t&=\boldsymbol G_t\boldsymbol\Sigma_{t-1}\boldsymbol G_t^{\text{T}}+\boldsymbol R_t\\
+        \notag\\
+        \boldsymbol K_t&=\boldsymbol{\bar\Sigma}_t\boldsymbol H_t^{\text{T}}(\boldsymbol H_t\boldsymbol{\bar\Sigma}_t\boldsymbol H_t^{\text{T}}+\boldsymbol Q_t)^{-1}\\
+        \notag\\
+        \boldsymbol\mu_t&=\boldsymbol{\bar\mu}_t+\boldsymbol K_t(\boldsymbol z_t-h(\boldsymbol{\bar\mu}_t))\\
+        \boldsymbol\Sigma_t&=(\boldsymbol I-\boldsymbol K_t\boldsymbol H_t)\boldsymbol{\bar\Sigma}_t
+        \end{align}
+        $$
+    
+    -   局限：扩展卡尔曼滤波所应用的线性近似是否有优势取决于两个因素：被近似的**局部线性化程度**和**不确定度**，较高的不确定度通常会导致结果随机变量的均值和协方差估计更不精确，而更强的$g$的局部非线性会产生更大的近似误差。
+    
+3.  无迹卡尔曼滤波（Unscented Kalman Filter, UKF）
+
+    ​        无迹卡尔曼滤波采用另一种线性化方法，它通过使用加权统计线性回归过程实现随机线性化。==高斯滤波，先假设**系统状态转移**或**系统测量**之前为高斯分布，通过状态转移和测量，其分布经过非线性变换已经不是高斯分布，高斯滤波的目的是将变换之后的分布仍然按照高斯分布来计算（KF, EKF都是）==。首先，在高斯分布（状态转移和测量之前）上选择$2n+1$个$\sigma$点$\boldsymbol{\mathcal X}^{[i=0,2n]}$，并对其设置统计权重，然后经过变换得到$\boldsymbol{\mathcal Y}^{[i=0,2n]}$，并进行统计，得到其期望和方差，作为变换后的近似高斯分布本质参数。
+    
+    ​        以下是无迹卡尔曼滤波的数学表达。
+    
+    -   预测：通过系统方程$g$和前一个时刻$t-1$的状态置信度预测**前置信度$\overline{\text{bel}}(\boldsymbol x_t)$**
+    
+        -   选取点，通常情况下，选取期望以及对称分布主轴的协方差处（每维两个）
+            $$
+            \begin{align}
+            \boldsymbol{\mathcal X}^{[0]}&=\boldsymbol\mu\\
+            \boldsymbol{\mathcal X}^{[i]}&=\boldsymbol\mu+(\sqrt{(n+\lambda)\boldsymbol\Sigma})_i,\ \ \ \ i=1,\cdots,n\label{UKF-X2}\\
+            \boldsymbol{\mathcal X}^{[i]}&=\boldsymbol\mu-(\sqrt{(n+\lambda)\boldsymbol\Sigma})_{i-n},\ \ \ \ i=n+1,\cdots,2n\label{UKF-X3}
+            \end{align}
+            $$
+            $n$为状态向量维度，$\lambda=\alpha^2(n+\kappa)-n$，$\alpha$和$\kappa$为确定$\sigma$点分布在期望多元范围内的比例参数。在程序中可以将$\eqref{UKF-X2}$和$\eqref{UKF-X3}$式中的参数吸收到$\gamma$里面在迭代之前事先计算，写成如下形式
+            $$
+            \color{red}\begin{align}
+            \boldsymbol{\mathcal X}^{[0]}_{t-1}&=\boldsymbol\mu_{t-1}\\
+            \boldsymbol{\mathcal X}^{[i]}_{t-1}&=\boldsymbol\mu_{t-1}^{[i]}+(\gamma\sqrt{\boldsymbol\Sigma_{t-1}})^{[i]},\ \ \ \ i=1,\cdots,n\\
+            \boldsymbol{\mathcal X}_{t-1}^{[i]}&=\boldsymbol\mu_{t-1}^{[i-n]}-(\gamma\sqrt{\boldsymbol\Sigma_{t-1}})^{[i-n]},\ \ \ \ i=n+1,\cdots,2n
+            \end{align}
+            $$
+    
+        -   计算权重（权重跟时间$t$没有关系，可以事先计算），有两个权重，一个是计算期望的权重$w_m^{[i]}$，一个是计算协方差的权重$w_c^{[i]}$
+            $$
+            \begin{align}
+            w_m^{[0]}&=\frac{\lambda}{n+\lambda}\\
+            w_c^{[0]}&=\frac{\lambda}{n+\lambda}+(1-\alpha^2+\beta)\\
+            w_m^{[i]}=w_c^{[i]}&=\frac{1}{2(n+\lambda)},\ \ \ \ i=1,\cdots,2n
+            \end{align}
+            $$
+            $\beta$是对高斯表示的附加的（较高阶）分布信息进行编码，对于精确的高斯分布，$\beta=2$。
+    
+        -   变换
+            $$
+            \color{red}\begin{align}
+            \bar{\boldsymbol{\mathcal{X}}}_{t}&=g(\boldsymbol u_t,\boldsymbol{\mathcal X_{t-1}})
+            \end{align}
+            $$
+    
+        -   计算前置信度（高斯）
+            $$
+            \color{red}
+            \begin{align}
+            \boldsymbol{\bar\mu}_t&=\sum_{i=1}^{2n}w_m^{[i]}\boldsymbol{\mathcal{\bar X}_t^{[i]}}\\
+            \boldsymbol{\bar\Sigma}_t&=\sum_{i=1}^{2n}w_c^{[i]}(\boldsymbol{\mathcal{\bar X}_t^{[i]}}-\boldsymbol{\bar\mu}_t)(\boldsymbol{\mathcal{\bar X}_t^{[i]}}-\boldsymbol{\bar\mu}_t)^{\text{T}}+\boldsymbol R_t
+            \end{align}
+            $$
+    
+    -   测量：测量过程是在$\boldsymbol x_t$上进行测量，而$\boldsymbol x_t$由$\overline{\text{bel}}(\boldsymbol x_t)$给定，
+    
+        -   选取点
+        -   变换
+        -   统计
