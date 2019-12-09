@@ -65,9 +65,11 @@
     \end{pmatrix}
     $$
 
-### 【1.4其他】
 
-1.  多元正态分布：$p(\boldsymbol x)=\det(2\pi\Sigma)^{-\frac12}\exp\{-\frac12(\boldsymbol{x-\mu})^\text{T}\Sigma^{-1}\boldsymbol{x-\mu})\}$
+
+### 【1.5其他】
+
+1.  多元高斯分布：$p(\boldsymbol x)=\det(2\pi\Sigma)^{-\frac12}\exp\{-\frac12(\boldsymbol{x-\mu})^\text{T}\Sigma^{-1}\boldsymbol{x-\mu})\}$
 
 2.  一个概率分布$p(x)$的熵：
     $$
@@ -77,6 +79,19 @@
     &H_p(x)=-\sum_{x}p(x)\log_2p(x) \ \ \ \ \text{（离散）}
     \end{align}
     $$
+    
+3.  正则参数：一个概率密度函数（分布）可以用**矩参数（一阶矩：期望，二阶矩：协方差矩阵，高阶矩……）**表示，也可以用**正则参数（矩参数的对偶参数）**表示。多元高斯分布的正则参数由**信息矩阵（精度矩阵）**$\boldsymbol\Omega$和**信息向量**$\boldsymbol\xi$表示
+    $$
+    \begin{align}
+    \boldsymbol\Omega&=\boldsymbol\Sigma^{-1}\label{gauss-informationmatrix}\\
+    \boldsymbol\xi&=\boldsymbol\Sigma^{-1}\boldsymbol\mu\label{gauss-informationvector}
+    \end{align}
+    $$
+    高斯分布的正则形式
+    $$
+    p(\boldsymbol x)=\eta\exp{-\frac12\boldsymbol x^{\text{T}}}\boldsymbol{\Omega x}+\boldsymbol x^{\text{T}}\boldsymbol\xi\label{gauss-canonical}
+    $$
+    
 
 ## 二、线性代数
 
@@ -84,7 +99,9 @@
 
 # 第二章 递归状态估计
 
-1.  状态：包含环境（动态状态：如周围人物的走动等，静态状态：建筑物的位置等）和机器人本身（机器人的位姿，速度、传感器是否正常等）的会对未来产生影响的所有方面的因素，用$\boldsymbol x​$表示。一般包括
+## 一、基本概念
+
+1.  状态：包含环境（动态状态：如周围人物的走动等，静态状态：建筑物的位置等）和机器人本身（机器人的位姿，速度、传感器是否正常等）的会对未来产生影响的所有方面的因素，用$\boldsymbol x$表示。一般包括
     -   机器人的位姿：机器人相对于全局坐标系的位置和方向
     -   机器人执行机构配置（运动学状态）：各个关节的关节角度以及其它自由度
     -   机器人的运动状态：速度、角速度
@@ -101,6 +118,8 @@
 4. 置信度（信息的状态/信息状态）-置信分布
    -   置信度分布是**以可获得数据（所有过去的测量$\boldsymbol{z}_t$和所有过去的控制$\boldsymbol u_t$）为条件**的**关于状态变量的**后验概率$\text{bel}(\boldsymbol x_t)=p(\boldsymbol x_t|\boldsymbol z_{1:t}, \boldsymbol u_{1:t})$，注意$\boldsymbol z$的下表是$1:t$而不是$1:t-1$。
    -   综合$\boldsymbol z_t$之前计算的后验概率或者置信度（有些地方叫做似然）$\overline{\text{bel}}(\boldsymbol x_t)=p(\boldsymbol x_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})$，是通过$t$之前历史测量数据对状态转移概率（先验）的修正。
+
+## 二、贝叶斯滤波
 
 5. 贝叶斯（Bayes）滤波
 
@@ -129,12 +148,12 @@
    $$
    \eta=p(\boldsymbol z_t|\boldsymbol z_{1:t-1},\boldsymbol u_{1:t})=\int p(\boldsymbol z_t|\boldsymbol x_{t-1})\text{d}\boldsymbol x_{t-1}\label{eta}
    $$
-   ​        通过$\eqref{belief}​$式将当前时刻的系统状态置信度变为测量概率分布与**似然**的乘积，而似然又可以根据前一个时刻的置信度与状态转移概率得出，当$t=1​$时，需要初始置信度$\text{bel}(\boldsymbol x_0)​$。这就是贝叶斯滤波方法，其中(1)~(2)为预测，(4)为测量，(5)为更新。
+   ​        通过$\eqref{belief}$式将当前时刻的系统状态置信度变为测量概率分布与**似然**的乘积，而似然又可以根据前一个时刻的置信度与状态转移概率得出，当$t=1$时，需要初始置信度$\text{bel}(\boldsymbol x_0)$。这就是贝叶斯滤波方法，其中(1)~(2)为预测，(4)为测量，(5)为更新。
 
    ​        贝叶斯滤波算法的步骤：
 
-   -   (0) 初始化初始置信度$\text{bel}(\boldsymbol x_0)​$，$t=1​$；
-   -   **(1) 根据系统方程计算状态转移概率作为先验概率分布$p(\boldsymbol x_t|\boldsymbol x_{t-1},\boldsymbol u_t)​$；**
+   -   (0) 初始化初始置信度$\text{bel}(\boldsymbol x_0)$，$t=1$；
+   -   **(1) 根据系统方程计算状态转移概率作为先验概率分布$p(\boldsymbol x_t|\boldsymbol x_{t-1},\boldsymbol u_t)$；**
    -   **(2) 根据状态转移概率$p(\boldsymbol x_t|\boldsymbol x_{t-1},\boldsymbol u_t)$和前一个时刻的状态置信度$\text{bel}(\boldsymbol x_{t-1})$，利用$\eqref{siran}$式计算$\overline{\text{bel}}(\boldsymbol x_t)$；**
    -   **(3) 根据$\eqref{eta}$式计算$t$时刻的归一化常数$\eta_t$；**
    -   **(4) 根据系统测量方程得到测量概率分布$p(\boldsymbol z_t|\boldsymbol x_t)$；**
@@ -147,6 +166,8 @@
 $$
 p(\boldsymbol x)=\det(2\pi\Sigma)^{-\frac12}\exp\{-\frac12(\boldsymbol{x-\mu})^\text{T}\Sigma^{-1}\boldsymbol{x-\mu})\}\label{gaussian}
 $$
+
+## 一、卡尔曼滤波
 
 1. 卡尔曼滤波（Kalman Filter, KF）
 
@@ -182,16 +203,16 @@ $$
            其中$\mathcal{N}(x;\mu,\sigma^2)$表示高斯分布，$\mu_{t-1\to t}$表示状态转移概率的期望，$\Sigma_{t-1\to t}$表示状态转移概率的协方差，$\mu_{t-1}$表示$t-1$时刻的置信度期望，$\Sigma_{t-1}$表示$t-1$时刻置信度的协方差。$\eqref{KF-barbel}$式是两个高斯分布乘积的积分，其结果仍然是高斯分布。**由于两个高斯分布的乘积，其各自的指数部分都是关于各自随机变量的二次型，指数函数相乘即指数相加，二次型相加仍然为各自随机变量的新二次型，新二次型记为$\mathscr{L}(\boldsymbol x_t)$。积分积掉$\boldsymbol x_{t-1}$，对$\boldsymbol x_t$仍然为高斯分布，对$\mathscr{L}(\boldsymbol x_t)$求一阶导数和二阶导数即可求出$\boldsymbol{\bar\mu}$和$\boldsymbol{\bar\Sigma}_t$**。
            $$
            \color{red}\begin{align}
-           \boldsymbol{\bar\mu}&=\boldsymbol A_t\boldsymbol\mu_{t-1}+\boldsymbol B_t\boldsymbol u_t\\
-           \boldsymbol{\bar\Sigma}_t&=(\boldsymbol A_t\boldsymbol\Sigma^{-1}_{t-1}\boldsymbol A_t^{\text{T}}+\boldsymbol R_t)^{-1}
+           \boldsymbol{\bar\mu}&=\boldsymbol A_t\boldsymbol\mu_{t-1}+\boldsymbol B_t\boldsymbol u_t\label{KF-barbel-u}\\
+           \boldsymbol{\bar\Sigma}_t&=(\boldsymbol A_t\boldsymbol\Sigma^{-1}_{t-1}\boldsymbol A_t^{\text{T}}+\boldsymbol R_t)^{-1}\label{KF-barbel-sigma}
            \end{align}
            $$
 
        -   **更新：**根据$\eqref{belief}$式以及线性高斯假设，
            $$
            \begin{align}
-           \text{bel}(\boldsymbol x_t)&=\eta\mathcal{N}(\boldsymbol z_t;\boldsymbol\mu_t^{z},\boldsymbol Q_t)\cdot\mathcal{N}(\boldsymbol x_t;\boldsymbol{\bar\mu}_t\boldsymbol{\bar\Sigma}_t)\\
-           &=\mathcal{N}(\boldsymbol x_t;\boldsymbol\mu_t,\boldsymbol\Sigma_t)
+           \text{bel}(\boldsymbol x_t)&=\eta\mathcal{N}(\boldsymbol z_t;\boldsymbol\mu_t^{z},\boldsymbol Q_t)\cdot\mathcal{N}(\boldsymbol x_t;\boldsymbol{\bar\mu}_t\boldsymbol{\bar\Sigma}_t)\notag\\
+           &=\mathcal{N}(\boldsymbol x_t;\boldsymbol\mu_t,\boldsymbol\Sigma_t)\label{KF-bel}
            \end{align}
            $$
            其中，$\boldsymbol\mu_t^z=\boldsymbol C_t\boldsymbol x_t$为测量期望，$\boldsymbol Q_t$为测量协方差，$\boldsymbol\mu_t$为$t$时刻置信度期望，$\boldsymbol\Sigma_t$为$t$时刻置信度协方差。**两个高斯分布相乘同样是高斯分布**。
@@ -211,11 +232,13 @@ $$
 
        (a)先验和初始置信度；(b)测量；(c)置信度；(d)状态转移（机器人移动），先验和上一步置信度结合$\overline{\text{bel}}(\boldsymbol x_t)$；(e)测量；(f)置信度。
 
+## 二、扩展卡尔曼滤波
+
 2. 扩展卡尔曼滤波（Extend Kalman Filter, EKF）
 
    ​        卡尔曼滤波的重要假设是线性高斯系统，其中**线性**的含义是，**①观测是状态的线性函数**，并且**②下一个状态是前一个状态的线性函数**。**高斯线性系统的特性是，高斯随机变量的任何线性变换都将导致另一个高斯随机变量。**不幸的是，实际中状态转移和测量很少是线性的，这使得卡尔曼滤波算法不适用于除了最平凡的机器人问题以外的其他所有问题（好象很严峻的样子）。
 
-   ​        扩展卡尔曼滤波假设状态转移概率和测量概率分别由非线性函数$g​$和$h​$控制。即
+   ​        扩展卡尔曼滤波假设状态转移概率和测量概率分别由非线性函数$g$和$h$控制。即
    $$
    \begin{align}
    \boldsymbol x_t&=g(\boldsymbol u_t,\boldsymbol x_{t-1})+\boldsymbol\varepsilon_t\\
@@ -235,7 +258,7 @@ $$
            &\approx g(\boldsymbol u_t,\boldsymbol\mu_{t-1})+\boldsymbol G_t(\boldsymbol x_{t-1}-\boldsymbol\mu_{t-1})\label{g_taylor}
            \end{align}
            $$
-           $\eqref{g_taylor}​$式就是一个线性函数，和$\eqref{KF-systemfunction}​$式一样，满足了**线性要求中**，**下一个状态是前一个状态的线性函数**这一要求，$\boldsymbol G_t=\frac{\partial g(\boldsymbol u_t,\boldsymbol x_{t-1})}{\partial \boldsymbol x_{t-1}}\vline_{\boldsymbol x_{t-1}=\boldsymbol\mu_{t-1}}=?​$，是雅可比矩阵。
+           $\eqref{g_taylor}$式就是一个线性函数，和$\eqref{KF-systemfunction}$式一样，满足了**线性要求中**，**下一个状态是前一个状态的线性函数**这一要求，$\boldsymbol G_t=\frac{\partial g(\boldsymbol u_t,\boldsymbol x_{t-1})}{\partial \boldsymbol x_{t-1}}\vline_{\boldsymbol x_{t-1}=\boldsymbol\mu_{t-1}}=?$，是雅可比矩阵。
            
        -   同理，将函数$h(\boldsymbol x_t)$在$\boldsymbol x_t=\boldsymbol{\bar\mu}_t$处做一阶泰勒展开
            $$
@@ -244,14 +267,14 @@ $$
            &\approx h(\boldsymbol{\bar\mu}_t)+\boldsymbol H_t(\boldsymbol x_t-\boldsymbol{\bar\mu}_t)
            \end{align}
            $$
-           满足了**线性要求中**，**观测是状态的线性函数**这一要求，$\boldsymbol H_t​$是雅可比矩阵。
+           满足了**线性要求中**，**观测是状态的线性函数**这一要求，$\boldsymbol H_t$是雅可比矩阵。
        
    -   扩展卡尔曼滤波算法：满足了系统的线性要求，只要初始置信度是高斯的，则就可以使用卡尔曼滤波数学原理，得出扩展卡尔曼滤波的算法过程，即
        $$
        \color{red}
        \begin{align}
        \boldsymbol{\bar\mu}_t&=g(\boldsymbol u_t,\boldsymbol\mu_{t-1})\\
-       \boldsymbol{\bar\Sigma}_t&=\boldsymbol G_t\boldsymbol\Sigma_{t-1}\boldsymbol G_t^{\text{T}}+\boldsymbol R_t\\
+       \boldsymbol{\bar\Sigma}_t&=\boldsymbol G_t\boldsymbol\Sigma_{t-1}\boldsymbol G_t^{\text{T}}+\boldsymbol R_t\label{EKF-barbel-sigma}\\
        \notag\\
        \boldsymbol K_t&=\boldsymbol{\bar\Sigma}_t\boldsymbol H_t^{\text{T}}(\boldsymbol H_t\boldsymbol{\bar\Sigma}_t\boldsymbol H_t^{\text{T}}+\boldsymbol Q_t)^{-1}\\
        \notag\\
@@ -261,6 +284,8 @@ $$
        $$
 
    -   局限：扩展卡尔曼滤波所应用的线性近似是否有优势取决于两个因素：被近似的**局部线性化程度**和**不确定度**，较高的不确定度通常会导致结果随机变量的均值和协方差估计更不精确，而更强的$g$的局部非线性会产生更大的近似误差。
+
+## 三、无迹卡尔曼滤波
 
 3. 无迹卡尔曼滤波（Unscented Kalman Filter, UKF）
 
@@ -317,7 +342,7 @@ $$
          \end{align}
          $$
 
-   - 测量：测量过程是在$\boldsymbol x_t​$上进行测量，而此时$\boldsymbol x_t​$由$\overline{\text{bel}}(\boldsymbol x_t)​$给定，
+   - 测量：测量过程是在$\boldsymbol x_t$上进行测量，而此时$\boldsymbol x_t$由$\overline{\text{bel}}(\boldsymbol x_t)$给定，
 
      - 选取点，在分布$\overline{\text{bel}}(\boldsymbol x_t)$上选取$\sigma$点
        $$
@@ -355,5 +380,72 @@ $$
        \boldsymbol\Sigma_t&=\boldsymbol{\bar\Sigma}_t-\boldsymbol K_t\boldsymbol S_t\boldsymbol K_t^{\text{T}}
        \end{align}
        $$
+       
+   
+   ​        无迹卡尔曼滤波通过分别对系统函数（前一个状态为高斯分布，高斯分布经过系统函数的非线性变换）和测量函数的（系统状态为高斯分布，高斯分布经过测量函数的非线性变换）结果的统计，计算出各自期望和方差，并以此人为制造高斯分布作为结果分布，该过程称为**无迹变换**。需要注意的是，对$g$的统计参数和对$h$的变换参数$\alpha$和$\beta$是同一组（为什么是同一组呢？）。
 
-​        无迹卡尔曼滤波通过分别对系统函数（前一个状态为高斯分布，高斯分布经过系统函数的非线性变换）和测量函数的（系统状态为高斯分布，高斯分布经过测量函数的非线性变换）结果的统计，计算出各自期望和方差，并以此人为制造高斯分布作为结果分布，该过程称为**无迹变换**。需要注意的是，对$g$的统计参数和对$h$的变换参数$\alpha$和$\beta​$是同一组（为什么是同一组呢？）。
+## 四、信息滤波
+4. 信息滤波（Information Filter, IF）
+
+    ​        信息滤波是卡尔曼滤波（KF）的对偶算法。在线性高斯系统（假设）下，系统的状态方程和测量方程均为线性，并且具有高斯随机噪声，如$\eqref{KF-systemfunction}$和$\eqref{KF-measurefunction}$式所示。
+
+    ​        信息滤波将高斯分布表示为信息矩阵和信息向量，以下式数学形式
+
+    -   预测：计算前置信度$\overline{\text{bel}}(\boldsymbol x_t)$
+
+        根据信息矩阵$\eqref{gauss-informationmatrix}$式和信息向量$\eqref{gauss-informationvector}$的定义，将其带入卡尔曼滤波方程$\eqref{KF-barbel-u}$式和$\eqref{KF-barbel-sigma}$式，得到
+        $$
+        \color{red}
+        \begin{align}
+        \bar{\boldsymbol\Omega}_t&=(\boldsymbol A_t\boldsymbol\Omega_{t-1}^{-1}\boldsymbol A_{t}^{\text{T}}+\boldsymbol R_t)^{-1}\\
+        \bar{\boldsymbol\xi}_t&=\bar{\boldsymbol\Omega}_t(\boldsymbol A_t\boldsymbol\Omega_{t-1}^{-1}\boldsymbol\xi_{t-1}+\boldsymbol B_t\boldsymbol u_t)
+        \end{align}
+        $$
+
+    -   更新：计算置信度$\text{bel}(\boldsymbol x_t)$
+
+        将卡尔曼滤波中$\eqref{KF-bel}$式表示成正则形式$\eqref{gauss-canonical}$，并通过合并同类项，得到
+    
+    $$
+    \color{red}
+        \begin{align}
+        \boldsymbol\xi_t&=\boldsymbol C_t^{\text{T}}\boldsymbol Q_t^{-1}\boldsymbol z_t+\bar{\boldsymbol\xi}_t\\
+        \boldsymbol\Omega_t&=\boldsymbol C_t^{\text{T}}\boldsymbol Q_t^{-1}\boldsymbol C_t+\bar{\boldsymbol\Omega}_t
+        \end{align}
+    $$
+    
+    ​        信息滤波的预测过程需要对矩阵求逆，时间复杂度为$O(n^{2.4})$，更新过程是增量的，最坏时间复杂度为$O(n^2)$；而卡尔曼滤波预测是增量的，最坏时间复杂度为$O(n^2)$，更新过程需要对矩阵求逆，时间复杂度为$O(n^{2.4})$。
+
+## 五、扩展信息滤波
+
+5.  扩展信息滤波（Extend Information Filter, EIF）
+
+    ​        扩展信息滤波和扩展卡尔曼滤波一样，采用一阶泰勒展开的方法近似非线性函数$g$和$h$，利用了雅可比矩阵$\boldsymbol G_t$和$\boldsymbol H_t$。以下是其数学形式
+    
+    -   预测：计算前置信度$\overline{\text{bel}}(\boldsymbol x_t)$
+    
+        首先从前一个时刻的置信度$\text{bel}(\boldsymbol x_{t-1})$恢复期望
+        $$
+        \color{red}\boldsymbol\mu_{t-1}=\boldsymbol\Omega_{t-1}^{-1}\boldsymbol\xi_{t-1}
+        $$
+        然后计算前置信度的正则参数，参考扩展卡尔曼滤波算法中$\eqref{EKF-barbel-sigma}$式，并对其求逆得到信息矩阵，然后根据正则参数定义计算信息向量，其中$\eqref{EIF-bar-xi}$式认为$\boldsymbol\mu_{t-1}$处的零阶泰勒展开就是$t$时刻状态的前置信度期望$\color{red}\bar{\boldsymbol\mu}_t=g(\boldsymbol u_t,\boldsymbol\mu_{t-1})$。
+        $$
+        \color{red}
+        \begin{align}
+        \bar{\boldsymbol\Omega}_{t}&=(\boldsymbol G_t\boldsymbol\Omega_{t-1}^{-1}\boldsymbol G_t^{\text{T}}+\boldsymbol R_t)^{-1}\\
+        \bar{\boldsymbol\xi_t}&=\bar{\boldsymbol\Omega}_tg(\boldsymbol u_t,\boldsymbol\mu_{t-1})\label{EIF-bar-xi}
+        \end{align}
+        $$
+    
+    -   更新：计算置信度$\text{bel}(\boldsymbol x_t)$
+        $$
+        \color{red}
+        \begin{align}
+        \boldsymbol\Omega_t&=\bar{\boldsymbol\Omega}_{t}+{\boldsymbol H}_{t}^{\text{T}}{\boldsymbol Q}_{t}^{-1}{\boldsymbol H}_{t}\\
+        \boldsymbol\xi_t&=\bar{\boldsymbol\xi}_t+{\boldsymbol H}_{t}^{\text{T}}{\boldsymbol Q}_{t}^{-1}[\boldsymbol z_t-h(\bar\mu_t)+\boldsymbol H_t\bar{\boldsymbol\mu}_t]
+        \end{align}
+        $$
+        
+
+
+​    
