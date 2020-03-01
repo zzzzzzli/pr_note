@@ -17,20 +17,31 @@
 2.  如果将两件事看作一件事
     $$
     \begin{align}
-    p(B|A,C)&=\frac{p(ABC)}{p(AC)}\notag\\
-    &=\frac{p(A|B,C)\cdot p(BC)}{p(AC)}\notag\\
+    p(B|A,C)&=\frac{p(A,B,C)}{p(A,C)}\notag\\
+    &=\frac{p(A|B,C)\cdot p(B,C)}{p(A,C)}\notag\\
     &=\frac{p(A|B,C)\cdot p(B|C)\cdot p(C)}{p(A|C)\cdot p(C)}\notag\\
     &=\frac{p(A|B,C)\cdot p(B|C)}{p(A|C)}\\
-    p(A|B,C)&=\frac{p(B|A,C)\cdot p(A|C)}{p(B|C)}\label{PABC}
+    p(A|B,C)&=\frac{p(B|A,C)\cdot p(A|C)}{p(B|C)}\label{PABC}\\
+    p(A|B,C)&=\frac{p(A,B,C)}{p(B,C)}\notag\\
+    &=\frac{p(A,B,C)p(C)}{p(C)p(B,C)}\notag\\
+    &=\frac{p(A,B|C)}{p(B|C)}
     \end{align}
     $$
-    
+
 3.  **条件独立：**$p(x,y|z)=p(x|z)p(y|z)$，表达以$z$为条件的两个独立随机变量的联合概率，并且，条件独立定律一般不能和独立时间公式$p(x,y)=p(x)p(y)$互推。
 
 ### 【1.2 贝叶斯】
 
 1.  贝叶斯（Bayes）的先验概率：如果$x$是希望从$y$中推测出来的数值，则$p(x)$称为**先验概率**，先验概率不包含任何关于从$y$到$x$的推测，仅仅是人们对$x$的经验认识，$y$称为**数据**，在机器人中就是传感器测量值。$p(x)$总结了在综合数据$y$之前已经有的关于$x$的信息。
+
 2.  贝叶斯的后验概率：从传感器数据$y$推断$x$的值得到的关于$x$的概率分布$p(x|y)$，称为**在$X$上的后验概率分布**。由条件概率公式（贝叶斯定理），后验概率分布$p(x|y)=\frac{p(y|x)p(x)}{p(y)}$，由于分母$p(y)$不依赖任何$x$，因此对于任何$x$，$p(y)$总是常数，称为**归一化常数**。所以，贝叶斯定理的简洁表达式为：$p(x|y)=\eta p(y|x)p(x)$。
+
+3.  贝叶斯公式：
+    $$
+    p(A|B)=\frac{p(B|A)p(A)}{p(B)}\\
+    p(B_i|A)=\frac{p(B_i)p(A|B_i)}{\sum_jp(B_j)p(A|B_j)}
+    $$
+
 
 ### 【1.3方差、协方差、协方差矩阵】
 
@@ -66,8 +77,7 @@
     $$
 
 
-
-### 【1.5其他】
+### 【1.4其他】
 
 1.  多元高斯分布：$p(\boldsymbol x)=\det(2\pi\Sigma)^{-\frac12}\exp\{-\frac12(\boldsymbol{x-\mu})^\text{T}\Sigma^{-1}\boldsymbol{x-\mu})\}$
 
@@ -79,7 +89,7 @@
     &H_p(x)=-\sum_{x}p(x)\log_2p(x) \ \ \ \ \text{（离散）}
     \end{align}
     $$
-    
+
 3.  正则参数：一个概率密度函数（分布）可以用**矩参数（一阶矩：期望，二阶矩：协方差矩阵，高阶矩……）**表示，也可以用**正则参数（矩参数的对偶参数）**表示。多元高斯分布的正则参数由**信息矩阵（精度矩阵）**$\boldsymbol\Omega$和**信息向量**$\boldsymbol\xi$表示
     $$
     \begin{align}
@@ -91,7 +101,7 @@
     $$
     p(\boldsymbol x)=\eta\exp{-\frac12\boldsymbol x^{\text{T}}}\boldsymbol{\Omega x}+\boldsymbol x^{\text{T}}\boldsymbol\xi\label{gauss-canonical}
     $$
-    
+
 
 ## 二、线性代数
 
@@ -446,6 +456,159 @@ $$
         \end{align}
         $$
         
+# 第四章   非参数滤波
+
+​        非参数滤波（直方图滤波和粒子滤波）不需要对后验概率密度进行强参数化假设，并且能够很好地表示多峰置信度。在处理全局不确定问题时，或面对会产生独立、不同假设的数据关联问题时，通常会采用直方图滤波或粒子滤波。
+
+## 一、直方图滤波
+
+​        直方图滤波（Histogram Filter）将状态空间分解成有限区域，并用一个单一的概率值表示每一个区域的累积后验概率密度。
+
+-   连续空间：直方图滤波
+-   离散（有限）空间：离散贝叶斯滤波
+
+### 4.1.1 离散贝叶斯滤波
+
+​        离散贝叶斯滤波（discrete Bayes Filter）的状态空间$X$为K个取值，每一个状态取值$\boldsymbol  x_k$用一个概率值表示其置信度，则时刻$t$的状态置信度可以表示为$p_{k,t}$。
+
+​        复习一下贝叶斯滤波：1.  首先根据系统方程$\boldsymbol x_t=g(\boldsymbol u_t,\boldsymbol x_{t-1})+\boldsymbol\varepsilon_t$计算状态转移概率$p(\boldsymbol x_t|\boldsymbol x_{t-1},\boldsymbol u_t)$作为先验分布；2. 根据状态转移概率和前一个时刻的置信度$\text{bel}(\boldsymbol x_t)$计算$\boldsymbol z_t$之前的置信度$\overline{\text{bel}}(\boldsymbol x_t)$；3. 根据系统测量方程$\boldsymbol z_t=h(\boldsymbol x_t)+\boldsymbol\delta_t$得到的测量概率$p(\boldsymbol z_t|\boldsymbol x_t)$和$\overline{\text{bel}}(\boldsymbol x_t)$计算置信度$\text{bel}(\boldsymbol x_t)$。
+
+​        离散化贝叶斯滤波就是根据有限个状态空间的取值将贝叶斯滤波离散化，如下
+$$
+\begin{align}
+\overline{p}_{k,t}&=\sum_ip(X_t=\boldsymbol x_k|\boldsymbol u_t,X_{t-1}=\boldsymbol x_i)\cdot p_{i,t-1}\label{bayes-discrete1}\\
+p_{k,t}&=\eta p(\boldsymbol z_t|X_t=\boldsymbol x_k)\overline{p}_{k,t}\label{bayes-discrete2}\\
+(k&=1,2,3,\cdots,K)\notag
+\end{align}
+$$
+离散化贝叶斯滤波公式$\eqref{bayes-discrete1}$式和$\eqref{bayes-discrete2}$式是$\eqref{siran}$式和$\eqref{belief}$式的离散化形式，注意式中$p$为概率而不是概率密度。
+
+### 4.1.2 连续空间的直方图滤波
+
+​        连续空间的直方图滤波首先将状态空间划分为有限个区域，即栅格化（离散化，离散化后和离散贝叶斯滤波相同），然后用每一个栅格中的代表状态（如平均值）来表示该删格的状态，用该状态的置信度值表示删格中所有状态的置信度，如下图直方图所示，再使用离散贝叶斯滤波$\eqref{bayes-discrete1}$式和$\eqref{bayes-discrete2}$式进行滤波计算。
+
+![1582375076066](assets/1582375076066.png)
+
+1.  划分：将状态空间划分为有限个区域，用$\text{feild}_{k,t}$表示$t$时刻状态空间划分的第$k$个区域，
+    $$
+    \text{dom}(X_t)=\text{feild}_{1,t}\cup\text{feild}_{2,t}\cdots\cup\text{feild}_{K,t}\\
+    \text{feild}_{i,t}\cap\text{feild}_{j,t}=\emptyset\ \ \ \ \text{for}\ i\neq  j\ \ \ (i,j\in[1,K])
+    $$
+
+2.  后验置信度概率：栅格化后区域$\text{feild}_{k,t}$的置信度概率密度为该区域内的概率与区域大小比值，概率密度函数为分段常数函数，$|\text{feild}_{k,t}|$表示该区域的大小。
+    $$
+    p(\boldsymbol x_t\in\text{feild}_{k,t})=\frac{p_{k,t}}{|\text{feild}|_{k,t}}
+    $$
+
+3.  代表状态：在区域中选择一个代表状态作为该区域的状态，如去平均值
+    $$
+    \hat x_{k,t}=|\text{feild}_{k,t}|\int_{\text{feild}_{k,t}}\boldsymbol x_t\text{d}\boldsymbol x_t
+    $$
+
+4.  近似：当$\boldsymbol  x_t\in\text{feild}_{k,t}$时，取$p(\boldsymbol z_t|\hat x_{k,t})\approx p(\boldsymbol z_t|\boldsymbol x_t)$，则
+    $$
+    \begin{align}
+    p(\boldsymbol z_t|{\text{feild}_{k,t}})&\approx p(\boldsymbol z_t|\hat x_{k,t})\\
+    p(\text{feild}_{k,t}|\boldsymbol u_t,\text{feild}_{i,t-1})&\approx\eta|\text{feild}_{k,t}|p(\hat x_{k,t}|\boldsymbol u_t,\hat x_{i,t-1})
+    \end{align}
+    $$
 
 
-​    
+
+经过1、2、3、4将状态空间离散化，再使用离散贝叶斯滤波计算。
+
+### 4.1.3  空间分解
+
+​        直方图滤波技术先将状态空间分解为离散空间，分解方法有
+
+- **静态分解：**事先选定固定的分解形式，不依赖每一步的后验概率分布
+
+- **动态分解：**根据后验概率密度形状调节分解分辨率——密度树家族——区域越不相关，则分解越粗糙
+
+- **混合分解：**选择更新，只对被选择出的一小部分状态空间进行分解更新
+
+  ![1582374355429](../../../../../tmp/1582374355429.png)
+
+## 二、静态二值贝叶斯滤波
+
+​        静态二值贝叶斯滤波作为离散贝叶斯滤波的一个例子，在很多场景中得到应用，例如机器人判断前方的门是否为**开**状态。门的状态由照相机测量，其值只有**开（$\boldsymbol x$）**或**关（$\boldsymbol{\bar x}$）**两个状态。并且认为在检测期间门的状态不会发生改变。*当状态静止时，置信度只是测量的 函数，即* $\text{bel}_t(\boldsymbol x)=p(\boldsymbol x|\boldsymbol z_{1:t},\boldsymbol u_{1:t})=p(\boldsymbol x|\boldsymbol z_{1:t})$。状态$\boldsymbol x$没有下角标$t$，说明状态不随时间改变，相当于系统方程为$\boldsymbol x_t = \boldsymbol x_{t-1}$。
+
+​        这类问题使用**概率比对数$l_t(\boldsymbol x)$**来计算。定义概率的概率比对数
+$$
+l(\boldsymbol x)=\ln[\frac{p(\boldsymbol x)}{1-p(\boldsymbol x)}]=\ln[\frac{p(\boldsymbol x)}{p(\overline{\boldsymbol x})}]
+$$
+则置信度的概率比对数
+$$
+l(\boldsymbol x)=\ln[\frac{\text{bel}(\boldsymbol x)}{1-\text{bel}({\boldsymbol x})}]
+$$
+则置信度为
+$$
+\text{bel}(\boldsymbol x)=1-\frac{1}{e^{l(\boldsymbol x)}+1}\label{lxtobel}
+$$
+现在用置信度$\text{bel}(\boldsymbol x)$表达式反推$l(\boldsymbol x)$的数学形式。置信度定义为
+$$
+\text{bel}(\boldsymbol x)=p(\boldsymbol x|\boldsymbol z_{1:t})
+$$
+根据条件概率公式
+$$
+\begin{align}
+p(\boldsymbol x|\boldsymbol z_{1:t})&=\frac{{\color{red}p(\boldsymbol z_t|\boldsymbol x,\boldsymbol z_{1:t-1})}p(\boldsymbol x|\boldsymbol z_{1:t-1})}{p(\boldsymbol z_t|\boldsymbol z_{1:t-1})}\notag\\
+&=\frac{{\color{red}p(\boldsymbol z_t|\boldsymbol x)}p(\boldsymbol x|\boldsymbol z_{1:t-1})}{p(\boldsymbol z_t|\boldsymbol z_{1:t-1})}
+\end{align}
+$$
+
+$$
+\begin{align}
+p(\boldsymbol z_t|\boldsymbol x)=\frac{p(\boldsymbol x|\boldsymbol z_t)p(\boldsymbol z_t)}{p(\boldsymbol x)}
+\end{align}
+$$
+
+$$
+\begin{align}
+&p(\boldsymbol x|\boldsymbol z_{1:t})=\frac{p(\boldsymbol x|\boldsymbol z_t)p(\boldsymbol z_t)p(\boldsymbol x|\boldsymbol z_{1:t-1})}{p(\boldsymbol x)p(\boldsymbol z_t|\boldsymbol z_{1:t-1})}\\
+&p(\overline{\boldsymbol x}|\boldsymbol z_{1:t})=\frac{p(\overline{\boldsymbol x}|\boldsymbol z_t)p(\boldsymbol z_t)p(\overline{\boldsymbol x}|\boldsymbol z_{1:t-1})}{p(\overline{\boldsymbol x})p(\boldsymbol z_t|\boldsymbol z_{1:t-1})}
+\end{align}
+$$
+
+则
+$$
+\frac{p(\boldsymbol x|\boldsymbol z_{1:t})}{p(\overline{\boldsymbol x}|\boldsymbol z_{1:t})}=\frac{\frac{p(\boldsymbol x|\boldsymbol z_t)p(\boldsymbol z_t)p(\boldsymbol x|\boldsymbol z_{1:t-1})}{p(\boldsymbol x)p(\boldsymbol z_t|\boldsymbol z_{1:t-1})}}{\frac{p(\overline{\boldsymbol x}|\boldsymbol z_t)p(\boldsymbol z_t)p(\overline{\boldsymbol x}|\boldsymbol z_{1:t-1})}{p(\overline{\boldsymbol x})p(\boldsymbol z_t|\boldsymbol z_{1:t-1})}}=\frac{p(\boldsymbol x|\boldsymbol z_t)}{1-p(\boldsymbol x|\boldsymbol z_t)}\cdot\frac{p(\boldsymbol x|\boldsymbol z_{1:t-1})}{1-p(\boldsymbol x|\boldsymbol z_{1:t-1})}\cdot\frac{1-p(\boldsymbol x)}{p(\boldsymbol x)}
+$$
+
+$$
+\begin{align}
+l_t(\boldsymbol x)&=\ln\frac{p(\boldsymbol x|\boldsymbol z_t)}{1-p(\boldsymbol x|\boldsymbol z_t)}+\ln\frac{p(\boldsymbol x|\boldsymbol z_{1:t-1})}{1-p(\boldsymbol x|\boldsymbol z_{1:t-1})}+\ln\frac{1-p(\boldsymbol x)}{p(\boldsymbol x)}\label{lx1}\\
+&=\color{red}\ln\frac{p(\boldsymbol x|\boldsymbol z_t)}{1-p(\boldsymbol x|\boldsymbol z_t)}-\ln\frac{p(\boldsymbol x)}{1-p(\boldsymbol x)}+l_{t-1}(\boldsymbol x)\label{lx2}
+\end{align}
+$$
+
+$\eqref{lx1}$式第一项为反向测量模型，用$p(\boldsymbol x|\boldsymbol z_t)$来计算置信度而不是$p(\boldsymbol z_t|\boldsymbol x)$；第二项可以认为是$\ln\frac{p(\boldsymbol x_{t-1}|\boldsymbol z_{1:t-1})}{1-p(\boldsymbol x_{t-1}|\boldsymbol z_{1:t-1})}$，为前一个时刻置信度的概率比对数$l_{t-1}(\boldsymbol x_{t-1})$，由于状态不改变，因此向量$\boldsymbol x$无下标；第三项为先验概率的概率比对数，由于状态不改变，则为初始状态置信度的概率比对数$l_0(\boldsymbol x)$。可以根据$\eqref{lx2}$式计算$l(\boldsymbol x)$，然后根据$\eqref{lxtobel}$式计算置信度。
+
+##三、粒子滤波
+
+​        粒子滤波在状态空间采集若干个**粒子（样本点）**来表示后验概率密度，要这样做，这些粒子必须能够代表真实的状态置信度$\text{bel}(\boldsymbol x)$，也就是说，必须按照$\text{bel}(\boldsymbol x)$的概率分布，要么平均抽样，每个粒子（样本点）根据状态置信度$\text{bel}(\boldsymbol x)$具有一定的概率（权重）；要么根据置信度分布进行重要性抽样，每个粒子具有平均权值，将原本的平均抽样方法用重要性抽样代替，即蒙特卡罗思想的核心。前者的困难在于置信度本身未知而无法确定每个样本的权重，后者置信度概率分布同样未知而不能直接进行重要性抽样，因此选择重要性分布函数$q(\boldsymbol x)$，来代替置信度分布进行抽样，虽然两者不同，但是经过以下推到证明重要性分布函数重要性抽样可以逼近置信度分布的重要性抽样。
+
+​        假设状态$x$的0置信度分布为$p(x|y)=\frac{p(xy)}{p(y)}=\frac{p(xy)p(x)}{p(x)p(y)}=\frac{p(y|x)p(x)}{p(y)}$，选择$q(x|y)$为重要性分布函数，则$x$的平均值为
+$$
+\begin{align}
+E(x)&=\int x\cdot p(x|y)\text{d}x\notag\\
+&=\int x\cdot \frac{p(x|y)}{q(x|y)}\cdot q(x|y)\text{d}x\notag\\
+&=\int x\cdot \frac{\color{red}p(y|x)p(x)}{p(y)\color{red}q(x|y)}\cdot q(x|y)\text{d}x\notag\\
+&=\int x\cdot\frac{\color{red}\omega(x,y)}{\color{blue}p(y)}\cdot q(x|y)\text{d}x\notag\\
+&=\int x\cdot \frac{\color{red}\omega(x,y)}{\color{blue}\int p(y|x)p(x)\text{d}x}\cdot q(x|y)\text{d}x\notag\\
+&=\frac{\int x\cdot \omega(x,y)\cdot q(x|y)\text{d}x}{\int{\color{red}p(y|x)p(x)}\text{d}x}\notag\\
+&=\frac{\int x\cdot \omega(x,y) q(x|y)\text{d}x}{\int{\color{red}\omega(x,y)q(x|y)}\text{d}x}\label{EXpq}\\
+&=\int x{\color{red}\omega'(x,y)}\cdot q(x|y)\text{d}x\label{EXpq2}
+\end{align}
+$$
+$\eqref{EXpq}$式证明了任意选取的重要性概率分布函数$q(x|y)$只需乘以权重系数$\omega(x,y)=\frac{p(y|x)p(x)}{q(x|y)}$来计算关于$x$的平均值与直接使用$p(x|y)$计算是等价的。$\eqref{EXpq2}$式中，$\omega'(x,y)$是$\omega(x,y)$对$q(x|y)$的平均，$\eqref{EXpq2}$式证明了即使从$q(x|y)$中产生粒子，使用$\omega'(x,y)$来对粒子加权也可以收敛得到$p(x|y)$。对$\omega'(x,y)$的计算如下
+$$
+\begin{align}
+\omega'(x,y)&=\int\omega(x,y)q(x|y)\text{d}x\\
+\omega(x,y)&=\frac{p(y|x)p(x)}{q(x|y)}
+\end{align}
+$$
+说明，即使$p(x|y)$是未知的，但是如果$p(y|x)$和$p(x)$是可知的，就可以通过$q(x|y)$抽样去逼近$p(x|y)$。
+
+### 4.3.1重要性抽样
+
